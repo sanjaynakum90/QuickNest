@@ -3,11 +3,14 @@ import dotenv from "dotenv"
 dotenv.config({ path: "./.env" })
 
 import HttpError from "./middleware/HttpError.js"
+import userRoutes from "./routes/userRoutes.js"
 import connectDB from "./config/db.js"
 
 const app = express()
 
 app.use(express.json())
+
+app.use("/User", userRoutes)
 
 app.get("/", (req, res) => {
     res.status(200).json("hello form server")
