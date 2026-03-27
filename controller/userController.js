@@ -2,7 +2,7 @@ import HttpError from "../middleware/HttpError.js"
 import User from "../model/User.js"
 
 
-const add = async (req, res, next) => {
+const addUser = async (req, res, next) => {
     try {
         const { name, email, password, role, phone } = req.body
 
@@ -38,4 +38,8 @@ const loginUser = async (req, res, next) => {
     }
 }
 
-export default { add, loginUser }
+const authLogin = async (req, res, next) => {
+
+}
+
+export default { addUser, loginUser }

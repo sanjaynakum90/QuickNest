@@ -32,6 +32,13 @@ const userSchema = mongoose.Schema({
         type: Boolean,
         default: false
     },
+
+    tokens: [{
+        token: {
+            type: String,
+            required: true
+        }
+    }]
 }, { timestamps: true })
 
 userSchema.pre("save", async function () {
@@ -58,6 +65,16 @@ userSchema.statics.findByCredential = async function (email, password) {
 
     } catch (error) {
         throw new Error(error.message)
+    }
+}
+
+userSchema.methods.generateAuthToken = async function (req, res, next) {
+    try {
+
+        
+
+    } catch (error) {
+
     }
 }
 
