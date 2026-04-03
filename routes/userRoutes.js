@@ -2,14 +2,14 @@ import express from "express";
 
 import userController from "../controller/userController.js";
 import validate from "../middleware/validate.js";
-import registerSchema from "../validation/registerSchema.js";
+import UserSchema from "../validation/userSchema.js";
 import auth from "../middleware/auth.js";
 import checkRole from "../middleware/checkRole.js";
 import uploads from "../middleware/upload.js";
 
 const router = express.Router();
 
-router.post("/add", validate(registerSchema),uploads.single("profilePic"), userController.add);
+router.post("/add", validate(UserSchema),uploads.single("profilePic"), userController.add);
 
 router.post("/login", userController.login);
 
