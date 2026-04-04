@@ -5,7 +5,7 @@ const updateUserData = async (req, res, next) => {
     try {
         const id = req.params.id;
 
-        const user = await User.findById()
+        const user = await User.findById(id)
 
         if (!user) {
             return next(new HttpError("user not found with this id", 404))
