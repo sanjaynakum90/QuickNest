@@ -13,7 +13,7 @@ const app = express();
 app.use(express.json());
 
 app.use("/user", userRouter);
-app.use("/admin", adminRoutes)
+app.use("/admin", adminRoutes);
 
 app.get("/", (req, res) => {
   res.json("hello from server");

@@ -114,7 +114,12 @@ const update = async (req, res, next) => {
 
     const updates = Object.keys(req.body);
 
-    const allowedFields = ["name", "password", "phone"];
+    let allowedFields = ["name", "password", "phone"];
+
+
+    if (req.body.role === "admin" || req.body.role === "super_admin") {
+      const allowedFields = [...allowedFields, role, profilePic]
+    }
 
     const isValid = updates.every((field) => allowedFields.includes(field));
 
