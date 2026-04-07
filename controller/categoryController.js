@@ -1,4 +1,4 @@
-import HttpError from "../middleware/HttpError"
+import HttpError from "../middleware/HttpError.js"
 
 
 const add = async (req, res, next) => {

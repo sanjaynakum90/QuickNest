@@ -6,10 +6,29 @@ import categoryController from "../controller/categoryController.js";
 
 const router = express.Router()
 
-router.patch("/update/:id", auth, checkRole("admin", "super_admin"), adminController.updateUserData)
+router.get(
+    "/allUser",
+    auth,
+    checkRole("admin", "super_admin"),
+    userController.allUser,
+);
 
-router.delete("/delete/:id", auth, checkRole("admin", "super_admin"), adminController.deleteUserData)
+router.patch(
+    "/update/:id",
+    auth,
+    checkRole("admin", "super_admin"),
+    adminController.updateUserData);
 
-router.post("/add", auth, checkRole("admin", "super_admin"), categoryController.add)
+router.delete(
+    "/delete/:id",
+    auth, checkRole("admin", "super_admin"),
+    adminController.deleteUserData);
+
+router.post(
+    "/add",
+    auth,
+    checkRole("admin", "super_admin"),
+    categoryController.add
+);
 
 export default router
