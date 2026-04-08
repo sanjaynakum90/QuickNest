@@ -31,4 +31,11 @@ router.post(
     categoryController.add
 );
 
+router.post(
+    "/addService",
+    auth,
+    checkRole("admin","super_admin"),
+    ser
+)
+
 export default router
