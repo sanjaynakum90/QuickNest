@@ -13,8 +13,18 @@ const categorySchema = mongoose.Schema({
     }
 },
     {
-        timestamps: true
+        timestamps: true,
+        toJSON: { virtuals: true },
+        toObject: { virtuals: true }
     }
-)
+);
+
+categorySchema.virtual("services", {
+    reg: "Services",
+    localField: "_id",
+    foreignField: "category"
+})
 
 const Category = mongoose.model("Category", categorySchema)
+
+export default Category
