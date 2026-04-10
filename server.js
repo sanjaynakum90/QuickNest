@@ -50,3 +50,30 @@ async function startServer() {
 }
 
 startServer();
+
+
+// const check = async () => {
+//   using Manual
+
+//    const service = await Service.findById("69d65ed232cbb03127ee8503")
+
+//      const category = await Category.findById(Service.category)
+
+//     console.log("Category",category)
+
+//   using Populate
+
+//    const service = await Service.findById("69d67a637c8156122afc94b5").populate("category","name")
+
+//    console.log("Services",service)
+
+//   using Virtual
+
+//   const category = await Category.findById("69d65eba32cbb03127ee84fa").populate(
+//     "service","name description price -_id -category"
+//   );
+
+//   console.log(category.service);
+// };
+
+// check();
