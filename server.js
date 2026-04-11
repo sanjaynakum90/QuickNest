@@ -55,7 +55,7 @@ startServer();
 // const check = async () => {
 //   using Manual
 
-//    const service = await Service.findById("69d65ed232cbb03127ee8503")
+//    const service = await Service.findById("69d65bb03127ee8503")
 
 //      const category = await Category.findById(Service.category)
 
@@ -63,13 +63,13 @@ startServer();
 
 //   using Populate
 
-//    const service = await Service.findById("69d67a637c8156122afc94b5").populate("category","name")
+//    const service = await Service.findById("69d67a637c8156122af").populate("category","name")
 
 //    console.log("Services",service)
 
 //   using Virtual
 
-//   const category = await Category.findById("69d65eba32cbb03127ee84fa").populate(
+//   const category = await Category.findById("69d65eba3127ee84fa").populate(
 //     "service","name description price -_id -category"
 //   );
 
