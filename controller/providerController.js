@@ -44,7 +44,7 @@ const registerAsProvider = async (req, res, next) => {
       documents,
     });
 
-    user.role="provider"
+    user.role = "provider"
 
     await newProvider.save();
 
@@ -62,4 +62,4 @@ const registerAsProvider = async (req, res, next) => {
 
 
 
-export default {registerAsProvider};
+export default { registerAsProvider };
