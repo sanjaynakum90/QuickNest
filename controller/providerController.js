@@ -1,7 +1,7 @@
 import Provider from "../model/provider.js";
 import HttpError from "../middleware/HttpError.js";
-import User from "../model/UserModel.js";
-import Service from "../model/service.js";
+import User from "../model/User.js";
+import Service from "../model/Services.js";
 
 import services from "../services/emailTemplate.js";
 
@@ -60,6 +60,27 @@ const registerAsProvider = async (req, res, next) => {
   }
 };
 
+const getAllProvider = async (req, res, next) => {
+  try {
+    let query = {};
+
+    const { isVerified } = req.query;
+
+    if (isVerified !== undefined) {
+      query.isVerified = isVerified;
+    }
+
+    const providers = await Provider.find(query).populate("userId service");
+
+    res.status(200).json({
+      success: true,
+      providers,
+    });
+  } catch (error) {
+    next(new HttpError(error.message, 500));
+  }
+};
 
 
-export default { registerAsProvider };
+
+export default { registerAsProvider, getAllProvider };

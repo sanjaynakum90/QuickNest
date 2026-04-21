@@ -1,3 +1,4 @@
+import { date } from "joi";
 import HttpError from "../middleware/HttpError.js";
 import Booking from "../model/Booking.js";
 import Service from "../model/Services.js";
@@ -76,7 +77,10 @@ const getAllBooking = async (req, res, next) => {
         { path: "userId", select: "name email phone -_id" },
       ]);
     } else if (role === "customer") {
-      bookings = await Booking.find({ userId: req.user._id });
+      bookings = await Booking.find({ userId: req.user._id }).populate(
+        "serviceId",
+        "name price duration description -_id"
+      );
     } else {
       return next(new HttpError("UnAuthorized", 401));
     }
@@ -136,10 +140,13 @@ const getBookingById = async (req, res, next) => {
     let role = req.user.role;
 
     if (role === "admin" || role === "super_admin") {
-      booking = await Booking.find({ userId }).populate(
-        "serviceId",
-        "name price description duration -_id",
-      );
+      booking = await Booking.findById(bookingId).populate([
+        { path: "serviceId", select: "name price duration" },
+        {
+          path: "userId",
+          select: "name email phone",
+        },
+      ]);
     }
 
     booking = await Booking.findById(bookingId);
@@ -165,12 +172,22 @@ const bookingByUserId = async (req, res, next) => {
   try {
     let booking;
 
-    let userId = req.params.id || req.params._id;
+    let loginUser = req.user._id
 
-    booking = await Booking.find({ userId }).populate(
-      "serviceId",
-      "name price description duration -_id",
-    );
+    let userId = req.params.id;
+
+    console.log("userid", userId);
+
+    if (loginUser) {
+      booking = await Booking.find({ userId: loginUser })
+    }
+
+    if (userId) {
+      booking = await Booking.find({ userId }).populate(
+        "serviceId",
+        "name price description duration -_id",
+      );
+    }
 
     if (!booking) {
       return next(new HttpError("No Booking Data Found", 404));
@@ -183,10 +200,59 @@ const bookingByUserId = async (req, res, next) => {
 };
 
 
+const availableTimeSlot = async (req, res, next) => {
+  try {
+    const { serviceId, bookingDate } = req.query
+
+    const service = await Service.findById(serviceId)
+
+    if (!service) {
+      return next(new HttpError("service not found ", 404))
+    }
+    const startOfDay = new date(bookingDate);
+    startOfDay.setHours(0, 0, 0, 0)
+
+    const endOfDay = new date(bookingDate);
+    endOfDay.setHours(23, 59, 59, 999)
+
+    const existingBooking = await Booking.find({
+      serviceId,
+      bookingDate: { $gte: startOfDay, $lt: endOfDay },
+      status: { $in: ["pending", "confirmed"] }
+    })
+
+    const bookedTimeSlot = existingBooking.map((b) => b.timeSlot);
+
+
+    const totalTimeSlot = [
+      "9:00-10:00",
+      "10:00-11:00",
+      "11:00-12:00",
+      "12:00-13:00",
+      "13:00-14:00",
+      "14:00-15:00",
+      "15:00-16:00",
+      "16:00-17:00",
+      "17:00-18:00",
+    ]
+
+    const availableTimeSlot = totalTimeSlot.filter((b) => !bookedTimeSlot.includes(b));
+
+    if (!availableTimeSlot.length) {
+      return next(new HttpError({ success: true, message: "currently no time slot available", slot: [] }))
+    }
+
+    res.status(200).json({ success: true, message: "available time slot fetched successfully", availableTimeSlot })
+  } catch (error) {
+    next(new HttpError(error.message))
+  }
+}
+
 export default {
   createBooking,
   getAllBooking,
   getByServiceId,
   getBookingById,
   bookingByUserId,
+  availableTimeSlot,
 };
