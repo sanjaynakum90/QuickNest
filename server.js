@@ -8,14 +8,15 @@ import connectDB from "./config/db.js";
 import userRouter from "./routes/userRoutes.js";
 import adminRoutes from "./routes/adminRoutes.js"
 import bookingRoutes from "./routes/bookingRoutes.js"
-
+import providerRoutes from "./routes/providerRoutes.js"
 const app = express();
 
 app.use(express.json());
 
 app.use("/user", userRouter);
 app.use("/admin", adminRoutes);
-app.use("/booking",bookingRoutes)
+app.use("/booking", bookingRoutes)
+app.use("/provider", providerRoutes)
 
 app.get("/", (req, res) => {
   res.json("hello from server");

@@ -1,6 +1,6 @@
 import HttpError from "../middleware/HttpError.js";
 import Booking from "../model/Booking.js";
-import Service from "../model/service.js";
+import Service from "../model/Services.js";
 
 const createBooking = async (req, res, next) => {
   try {
@@ -181,6 +181,7 @@ const bookingByUserId = async (req, res, next) => {
     next(new HttpError(error.message));
   }
 };
+
 
 export default {
   createBooking,
