@@ -1,6 +1,6 @@
 import HttpError from "../middleware/HttpError.js";
 import User from "../model/User.js";
-import cloudinary from "../config/cloudinary.js"
+import cloudinary from "../config/cloudinary.js";
 
 const add = async (req, res, next) => {
   try {
@@ -12,12 +12,11 @@ const add = async (req, res, next) => {
       password,
       role,
       phone,
-      profilePic: req.file ? req.file.path : "undefined",
-      cloudinaryId: req.file ? req.file.fileName : "undefined",
+      profilePic: req.file ? req.file.path : undefined,
+      cloudinaryId: req.file ? req.file.filename : undefined,
     };
 
     const user = new User(newUser);
-
     await user.save();
 
     res.status(201).json({ success: true, user });
@@ -32,11 +31,11 @@ const login = async (req, res, next) => {
 
     const user = await User.findByCredentials(email, password);
 
-    const token = await user.generateAuthToken();
-
     if (!user) {
-      return next(new HttpError("unable to login"));
+      return next(new HttpError("Unable to login", 401));
     }
+
+    const token = await user.generateAuthToken();
 
     res.status(200).json({ success: true, user, token });
   } catch (error) {
@@ -49,7 +48,7 @@ const authLogin = async (req, res, next) => {
     const user = req.user;
 
     if (!user) {
-      return next(new HttpError("user not found", 404));
+      return next(new HttpError("User not found", 404));
     }
 
     res.status(200).json({ success: true, user });
@@ -60,15 +59,10 @@ const authLogin = async (req, res, next) => {
 
 const logOut = async (req, res, next) => {
   try {
-    req.user.tokens = req.user.tokens.filter((t) => {
-      return t.token != req.token;
-    });
-
+    req.user.tokens = req.user.tokens.filter((t) => t.token !== req.token);
     await req.user.save();
 
-    res
-      .status(200)
-      .json({ success: true, message: "user logOut successfully" });
+    res.status(200).json({ success: true, message: "User logged out successfully" });
   } catch (error) {
     next(new HttpError(error.message, 500));
   }
@@ -77,12 +71,11 @@ const logOut = async (req, res, next) => {
 const logOutAll = async (req, res, next) => {
   try {
     req.user.tokens = [];
-
     await req.user.save();
 
     res.status(200).json({
       success: true,
-      message: "user logOut from all device successfully",
+      message: "User logged out from all devices successfully",
     });
   } catch (error) {
     next(new HttpError(error.message, 500));
@@ -94,12 +87,10 @@ const allUser = async (req, res, next) => {
     const users = await User.find({});
 
     if (users.length === 0) {
-      res.status(200).json({ success: true, message: "no user data found" });
+      return res.status(200).json({ success: true, message: "No user data found" });
     }
 
-    res
-      .status(200)
-      .json({ success: true, message: "all user data fetched", users });
+    res.status(200).json({ success: true, message: "All user data fetched", users });
   } catch (error) {
     next(new HttpError(error.message, 500));
   }
@@ -107,86 +98,75 @@ const allUser = async (req, res, next) => {
 
 const update = async (req, res, next) => {
   try {
-    const targetedUser = req.params.id || req.user._id;
+    const targetedUserId = req.params.id || req.user._id;
 
-    const user = await User.findById(targetedUser)
-
+    const user = await User.findById(targetedUserId);
     if (!user) {
-      return next(new HttpError("user not found", 404));
+      return next(new HttpError("User not found", 404));
+    }
+
+    const isAdmin = req.user.role === "admin" || req.user.role === "super_admin";
+    const isSelf = req.user._id.toString() === user._id.toString();
+
+  
+    if (!isAdmin && !isSelf) {
+      return next(new HttpError("Unauthorized access", 403));
     }
 
     const updates = Object.keys(req.body);
-
     let allowedFields = ["name", "password", "phone", "profilePic"];
 
-
-    if (req.user.role === "admin" || req.user.role === "super_admin") {
-      allowedFields = [...allowedFields, "role", "isVerified"]
+    if (isAdmin) {
+      allowedFields = [...allowedFields, "role", "isVerified"];
     }
 
     const isValid = updates.every((field) => allowedFields.includes(field));
-
     if (!isValid) {
-      return next(new HttpError("only allowed field can be updated", 400));
-    }
-
-    if (
-      !req.user.role === "admin" &&
-      !req.user.role === "super_admin" &&
-      !req.user._id.toString() !== user, _id.toString()
-    ) {
-      return next(new HttpError("unauthorized access", 401))
+      return next(new HttpError("Only allowed fields can be updated", 400));
     }
 
     if (req.file) {
       if (user.cloudinaryId) {
-        await cloudinary.uploader.destroy(user.cloudinaryId)
+        await cloudinary.uploader.destroy(user.cloudinaryId);
       }
-
       user.profilePic = req.file.path;
-
-      user.cloudinaryId = req.file.fileName;
+      user.cloudinaryId = req.file.filename;
     }
 
-    updates.forEach((update) => (user[update] = req.body[update]));
+    updates.forEach((field) => (user[field] = req.body[field]));
 
     await user.save();
 
-    res
-      .status(200)
-      .json({ success: true, message: "user Data updated successfully", user });
+    res.status(200).json({ success: true, message: "User data updated successfully", user });
   } catch (error) {
-    next(new HttpError(error.message));
+    next(new HttpError(error.message, 500));
   }
 };
 
 const deleteUser = async (req, res, next) => {
   try {
-    const targetedUser = req.params.id || req.user._id;
+    const targetedUserId = req.params.id || req.user._id;
 
-    const user = await User.findById(targetedUser)
-
+    const user = await User.findById(targetedUserId);
     if (!user) {
-      return next(new HttpError("user not found", 404));
+      return next(new HttpError("User not found", 404));
     }
 
-    if (
-      !req.user.role === "admin" &&
-      !req.user.role === "super_admin" &&
-      !req.user._id.toString() !== user._id.toString()
-    ) {
-      return next(new HttpError("unauthorized access", 401));
-    }
+    const isAdmin = req.user.role === "admin" || req.user.role === "super_admin";
+    const isSelf = req.user._id.toString() === user._id.toString();
 
-    await User.deleteOne(user)
+    
+    if (!isAdmin && !isSelf) {
+      return next(new HttpError("Unauthorized access", 403));
+    }
 
     if (user.cloudinaryId) {
-      await cloudinary.uploader.destroy(user.cloudinaryId)
+      await cloudinary.uploader.destroy(user.cloudinaryId);
     }
 
-    res
-      .status(200)
-      .json({ success: true, message: "user deleted successfully" });
+    await User.findByIdAndDelete(user._id);
+
+    res.status(200).json({ success: true, message: "User deleted successfully" });
   } catch (error) {
     next(new HttpError(error.message, 500));
   }
