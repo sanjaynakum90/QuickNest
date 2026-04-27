@@ -9,9 +9,14 @@ import userRouter from "./routes/userRoutes.js";
 import adminRoutes from "./routes/adminRoutes.js"
 import bookingRoutes from "./routes/bookingRoutes.js"
 import providerRoutes from "./routes/providerRoutes.js"
+import helmet from "helmet";
+import hpp from "hpp";
 const app = express();
 
 app.use(express.json());
+
+app.use(helmet());
+app.use(hpp());
 
 app.use("/user", userRouter);
 app.use("/admin", adminRoutes);
