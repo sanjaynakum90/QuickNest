@@ -163,7 +163,6 @@ const deleteProvider = async (req, res, next) => {
       return next(new HttpError("Provider not found", 404));
     }
 
-    // Only admin or the provider themselves can delete
     if (
       role !== "admin" &&
       role !== "super_admin" &&
@@ -172,7 +171,7 @@ const deleteProvider = async (req, res, next) => {
       return next(new HttpError("Unauthorized access", 403));
     }
 
-    // Revert the user's role back to customer
+
     await User.findByIdAndUpdate(provider.userId, { role: "customer" });
 
     await Provider.findByIdAndDelete(id);

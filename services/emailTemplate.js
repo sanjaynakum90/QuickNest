@@ -1,125 +1,779 @@
-function generateEmailTemplate(templateData) {
-    const {
-        subject = "Welcome to QuickNest 🎉",
-        userName = "User",
-        buttonUrl = "#"
-    } = templateData;
 
-    return `
+
+export const getWelcomeEmailTemplate = (userName) => {
+  return `
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+      <meta charset="UTF-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <title>Welcome to QuickNest</title>
+      <style>
+        * {
+          margin: 0;
+          padding: 0;
+          box-sizing: border-box;
+        }
+
+        body {
+          font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+          line-height: 1.6;
+          color: #333;
+          background-color: #f4f4f4;
+        }
+
+        .email-container {
+          max-width: 600px;
+          margin: 20px auto;
+          background-color: #ffffff;
+          border-radius: 8px;
+          box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+          overflow: hidden;
+        }
+
+        .header {
+          background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+          color: white;
+          padding: 40px 20px;
+          text-align: center;
+        }
+
+        .header h1 {
+          font-size: 28px;
+          margin-bottom: 5px;
+          font-weight: 600;
+        }
+
+        .header p {
+          font-size: 14px;
+          opacity: 0.9;
+        }
+
+        .content {
+          padding: 40px 30px;
+        }
+
+        .greeting {
+          font-size: 18px;
+          color: #333;
+          margin-bottom: 20px;
+          line-height: 1.8;
+        }
+
+        .greeting strong {
+          color: #667eea;
+          font-size: 20px;
+        }
+
+        .welcome-text {
+          font-size: 15px;
+          color: #555;
+          margin-bottom: 25px;
+          line-height: 1.8;
+        }
+
+        .features {
+          background-color: #f8f9fa;
+          padding: 25px;
+          border-radius: 6px;
+          margin: 25px 0;
+        }
+
+        .features h3 {
+          color: #667eea;
+          font-size: 16px;
+          margin-bottom: 15px;
+          font-weight: 600;
+        }
+
+        .features ul {
+          list-style: none;
+          margin: 0;
+          padding: 0;
+        }
+
+        .features li {
+          padding: 8px 0;
+          color: #555;
+          font-size: 14px;
+          display: flex;
+          align-items: center;
+        }
+
+        .features li:before {
+          content: "✓";
+          color: #667eea;
+          font-weight: bold;
+          margin-right: 10px;
+          font-size: 16px;
+        }
+
+        .cta-button {
+          display: inline-block;
+          background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+          color: white;
+          padding: 14px 35px;
+          text-decoration: none;
+          border-radius: 5px;
+          font-size: 16px;
+          font-weight: 600;
+          margin: 25px 0;
+          transition: transform 0.2s ease;
+        }
+
+        .cta-button:hover {
+          transform: translateY(-2px);
+        }
+
+        .support-text {
+          font-size: 14px;
+          color: #777;
+          margin-top: 25px;
+          padding-top: 20px;
+          border-top: 1px solid #eee;
+        }
+
+        .footer {
+          background-color: #f8f9fa;
+          padding: 25px 30px;
+          text-align: center;
+          border-top: 1px solid #eee;
+        }
+
+        .footer p {
+          font-size: 12px;
+          color: #888;
+          margin: 8px 0;
+        }
+
+        .footer a {
+          color: #667eea;
+          text-decoration: none;
+        }
+
+        .footer a:hover {
+          text-decoration: underline;
+        }
+
+        .social-links {
+          margin-top: 15px;
+        }
+
+        .social-links a {
+          display: inline-block;
+          margin: 0 10px;
+          color: #667eea;
+          font-size: 12px;
+          text-decoration: none;
+        }
+
+        .divider {
+          height: 1px;
+          background-color: #eee;
+          margin: 20px 0;
+        }
+
+        @media only screen and (max-width: 600px) {
+          .email-container {
+            margin: 0;
+            border-radius: 0;
+          }
+
+          .header {
+            padding: 30px 15px;
+          }
+
+          .header h1 {
+            font-size: 24px;
+          }
+
+          .content {
+            padding: 30px 20px;
+          }
+
+          .cta-button {
+            display: block;
+            text-align: center;
+          }
+        }
+      </style>
+    </head>
+    <body>
+      <div class="email-container">
+        <!-- Header -->
+        <div class="header">
+          <h1>🎉 Welcome to QuickNest</h1>
+          <p>Your journey starts here</p>
+        </div>
+
+        <!-- Content -->
+        <div class="content">
+          <div class="greeting">
+            Hi <strong>${userName}</strong>,
+          </div>
+
+          <div class="welcome-text">
+            Thank you for joining QuickNest! We're thrilled to have you as part of our community. Whether you're looking to discover amazing services or offer your expertise, you've come to the right place.
+          </div>
+
+          <!-- Features Section -->
+          <div class="features">
+            <h3>What you can do:</h3>
+            <ul>
+              <li>Browse and book professional services</li>
+              <li>Connect with experienced service providers</li>
+              <li>Track your bookings and manage appointments</li>
+              <li>Leave reviews and ratings</li>
+              <li>Get personalized recommendations</li>
+            </ul>
+          </div>
+
+          <div class="welcome-text">
+            Your account has been successfully created and is ready to use. Start exploring our platform and find the services you need.
+          </div>
+
+          <!-- CTA Button -->
+          <a href="https://quicknest.com/dashboard" class="cta-button">Get Started Now</a>
+
+          <div class="support-text">
+            <strong>Need help?</strong> Our support team is here for you. If you have any questions, don't hesitate to reach out to us at support@quicknest.com or visit our FAQ section.
+          </div>
+
+          <div class="divider"></div>
+
+          <div style="font-size: 14px; color: #666; line-height: 1.8;">
+            <p><strong>Quick Tips:</strong></p>
+            <p>✨ Complete your profile to get better recommendations</p>
+            <p>🔐 Use a strong password and enable two-factor authentication for security</p>
+            <p>📱 Download our mobile app for on-the-go access</p>
+          </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="footer">
+          <p>&copy; 2026 QuickNest. All rights reserved.</p>
+          <p>You received this email because you created an account on QuickNest</p>
+          
+          <div class="social-links">
+            <a href="#">Terms of Service</a> | 
+            <a href="#">Privacy Policy</a> | 
+            <a href="#">Contact Us</a>
+          </div>
+
+          <p style="margin-top: 15px; font-size: 11px;">
+            QuickNest | Email: support@quicknest.com | Help Center
+          </p>
+        </div>
+      </div>
+    </body>
+    </html>
+  `;
+};
+
+export const getProviderRegistrationEmailTemplate = (
+  userName,
+  serviceName,
+  experience,
+  document
+) => {
+  return `
 <!DOCTYPE html>
 <html>
 <head>
-  <meta charset="UTF-8">
-  <title>${subject}</title>
+<meta charset="UTF-8">
+<style>
+body{
+font-family:'Segoe UI';
+background:#f4f4f4;
+}
+.email-container{
+max-width:600px;
+margin:20px auto;
+background:#fff;
+border-radius:8px;
+overflow:hidden;
+}
+.header{
+background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);
+padding:40px;
+color:white;
+text-align:center;
+}
+.content{
+padding:40px 30px;
+color:#555;
+}
+.features{
+background:#f8f9fa;
+padding:25px;
+border-radius:6px;
+margin:20px 0;
+}
+.footer{
+background:#f8f9fa;
+padding:25px;
+text-align:center;
+font-size:12px;
+}
+</style>
 </head>
+<body>
 
-<body style="margin:0; padding:0; background-color:#f4f6f8; font-family: Arial, sans-serif;">
+<div class="email-container">
 
-  <table width="100%" cellpadding="0" cellspacing="0" style="padding:20px 0;">
-    <tr>
-      <td align="center">
+<div class="header">
+<h1>🛠 Provider Registration Submitted</h1>
+</div>
 
-        <!-- Main Container -->
-        <table width="600" cellpadding="0" cellspacing="0" style="background:#ffffff; border-radius:8px; overflow:hidden;">
-          
-          <!-- Header -->
-          <tr>
-            <td style="background:#4f46e5; color:#ffffff; padding:30px; text-align:center;">
-              <h1 style="margin:0;">Welcome to QuickNest 🚀</h1>
-              <p style="margin:8px 0 0; font-size:14px;">Smart Booking Made Easy</p>
-            </td>
-          </tr>
+<div class="content">
 
-          <!-- Content -->
-          <tr>
-            <td style="padding:30px;">
-              
-              <p style="font-size:16px;">Hi ${userName},</p>
+<p>Hi <strong>${userName}</strong>,</p>
 
-              <p style="font-size:15px; color:#555; line-height:1.6;">
-                Welcome to <strong>QuickNest</strong>! 🎉  
-                We're excited to have you on board.
-              </p>
+<p>Your provider registration request has been received successfully.</p>
 
-              <p style="font-size:15px; color:#555; line-height:1.6;">
-                QuickNest is your all-in-one platform to easily discover, book, and manage services — 
-                whether it's home services, professional help, or quick appointments.
-              </p>
+<div class="features">
+<p><strong>Service:</strong> ${serviceName}</p>
+<p><strong>Experience:</strong> ${experience} Years</p>
+<p><strong>Document:</strong> ${document}</p>
+<p><strong>Status:</strong> Pending Verification</p>
+</div>
 
-              <!-- Features -->
-              <table width="100%" style="margin:20px 0;">
-                <tr>
-                  <td style="padding:10px 0;">
-                    ✅ Easy Service Booking  
-                  </td>
-                </tr>
-                <tr>
-                  <td style="padding:10px 0;">
-                    ✅ Secure & Reliable Platform  
-                  </td>
-                </tr>
-                <tr>
-                  <td style="padding:10px 0;">
-                    ✅ Real-Time Availability  
-                  </td>
-                </tr>
-                <tr>
-                  <td style="padding:10px 0;">
-                    ✅ Manage Your Bookings Anytime  
-                  </td>
-                </tr>
-              </table>
+<p>Our team will review your details and verify your application soon.</p>
 
-              <!-- CTA Button -->
-              <table align="center" cellpadding="0" cellspacing="0" style="margin:25px 0;">
-                <tr>
-                  <td align="center" bgcolor="#4f46e5" style="border-radius:5px;">
-                    <a href="${buttonUrl}" 
-                       style="display:inline-block; padding:12px 30px; color:#ffffff; text-decoration:none; font-size:15px; font-weight:bold;">
-                       Explore Services
-                    </a>
-                  </td>
-                </tr>
-              </table>
+</div>
 
-              <!-- Extra Info -->
-              <p style="font-size:14px; color:#777;">
-                Need help getting started? Our support team is always here for you.
-              </p>
+<div class="footer">
+Thank you for joining QuickNest as Provider
+</div>
 
-              <p style="font-size:14px; color:#777;">
-                Let’s make your booking experience smooth and fast with QuickNest 🚀
-              </p>
-
-            </td>
-          </tr>
-
-          <!-- Divider -->
-          <tr>
-            <td style="border-top:1px solid #eee;"></td>
-          </tr>
-
-          <!-- Footer -->
-          <tr>
-            <td style="padding:20px; text-align:center; font-size:12px; color:#999;">
-              <p style="margin:5px 0;">© 2026 QUICKNEST. All rights reserved.</p>
-              <p style="margin:5px 0;">
-                <a href="#" style="color:#4f46e5; text-decoration:none;">Privacy Policy</a> |
-                <a href="#" style="color:#4f46e5; text-decoration:none;">Terms</a> |
-                <a href="#" style="color:#4f46e5; text-decoration:none;">Contact</a>
-              </p>
-            </td>
-          </tr>
-
-        </table>
-
-      </td>
-    </tr>
-  </table>
+</div>
 
 </body>
 </html>
-  `;
+`;
+};
+
+
+
+export const getBookingConfirmationEmailTemplate = (
+  userName,
+  serviceName,
+  bookingDate,
+  timeSlot
+) => {
+  return `
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<style>
+body{
+font-family:'Segoe UI';
+background:#f4f4f4;
+}
+.email-container{
+max-width:600px;
+margin:20px auto;
+background:#fff;
+border-radius:8px;
+overflow:hidden;
+}
+.header{
+background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);
+padding:40px;
+color:white;
+text-align:center;
+}
+.content{
+padding:40px 30px;
+}
+.features{
+background:#f8f9fa;
+padding:25px;
+border-radius:6px;
+margin:20px 0;
+}
+.footer{
+background:#f8f9fa;
+padding:25px;
+text-align:center;
+font-size:12px;
+}
+</style>
+</head>
+<body>
+
+<div class="email-container">
+
+<div class="header">
+<h1>✅ Booking Confirmed</h1>
+</div>
+
+<div class="content">
+
+<p>Hi <strong>${userName}</strong>,</p>
+
+<div class="features">
+<p>Service: ${serviceName}</p>
+<p>Date: ${bookingDate}</p>
+<p>Time: ${timeSlot}</p>
+</div>
+
+</div>
+
+<div class="footer">
+Thank you for choosing QuickNest
+</div>
+
+</div>
+
+</body>
+</html>
+`;
+};
+
+
+
+export const getBookingCancelledEmailTemplate = (
+  userName,
+  serviceName
+) => {
+  return `
+<!DOCTYPE html>
+<html>
+<head>
+<style>
+body{
+font-family:'Segoe UI';
+background:#f4f4f4;
+}
+.email-container{
+max-width:600px;
+margin:20px auto;
+background:#fff;
+border-radius:8px;
+overflow:hidden;
+}
+.header{
+background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);
+padding:40px;
+color:#fff;
+text-align:center;
+}
+.content{
+padding:40px 30px;
+}
+.features{
+background:#f8f9fa;
+padding:25px;
+border-radius:6px;
+margin:20px 0;
+}
+.footer{
+background:#f8f9fa;
+padding:25px;
+text-align:center;
+font-size:12px;
+}
+</style>
+</head>
+<body>
+
+<div class="email-container">
+
+<div class="header">
+<h1>❌ Booking Cancelled</h1>
+</div>
+
+<div class="content">
+
+<p>Hi <strong>${userName}</strong>,</p>
+
+<div class="features">
+<p>Your booking for ${serviceName} has been cancelled.</p>
+</div>
+
+</div>
+
+<div class="footer">
+QuickNest Support Team
+</div>
+
+</div>
+
+</body>
+</html>
+`;
+};
+
+
+
+export const getBookingCompletedEmailTemplate = (
+  userName,
+  serviceName
+) => {
+  return `
+<!DOCTYPE html>
+<html>
+<head>
+<style>
+body{
+font-family:'Segoe UI';
+background:#f4f4f4;
+}
+.email-container{
+max-width:600px;
+margin:20px auto;
+background:#fff;
+border-radius:8px;
+overflow:hidden;
+}
+.header{
+background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);
+padding:40px;
+color:#fff;
+text-align:center;
+}
+.content{
+padding:40px 30px;
+}
+.features{
+background:#f8f9fa;
+padding:25px;
+border-radius:6px;
+margin:20px 0;
+}
+.footer{
+background:#f8f9fa;
+padding:25px;
+text-align:center;
+font-size:12px;
+}
+</style>
+</head>
+<body>
+
+<div class="email-container">
+
+<div class="header">
+<h1>🎯 Service Completed</h1>
+</div>
+
+<div class="content">
+
+<p>Hi <strong>${userName}</strong>,</p>
+
+<div class="features">
+<p>Your ${serviceName} service has been completed successfully.</p>
+</div>
+
+</div>
+
+<div class="footer">
+© 2026 QuickNest
+</div>
+
+</div>
+
+</body>
+</html>
+`;
+};
+
+
+
+export const getForgotPasswordEmailTemplate = (
+  userName,
+  resetUrl
+) => {
+  return `
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<style>
+
+*{
+margin:0;
+padding:0;
+box-sizing:border-box;
 }
 
-export default generateEmailTemplate;
+body{
+font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif;
+background:#f4f4f4;
+line-height:1.6;
+color:#333;
+}
+
+.email-container{
+max-width:600px;
+margin:20px auto;
+background:#fff;
+border-radius:8px;
+box-shadow:0 2px 8px rgba(0,0,0,0.1);
+overflow:hidden;
+}
+
+.header{
+background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);
+padding:40px 20px;
+text-align:center;
+color:#fff;
+}
+
+.header h1{
+font-size:28px;
+margin-bottom:8px;
+}
+
+.header p{
+font-size:14px;
+opacity:0.9;
+}
+
+.content{
+padding:40px 30px;
+}
+
+.greeting{
+font-size:18px;
+margin-bottom:20px;
+}
+
+.greeting strong{
+color:#667eea;
+}
+
+.message{
+font-size:15px;
+color:#555;
+margin-bottom:25px;
+line-height:1.8;
+}
+
+.features{
+background:#f8f9fa;
+padding:25px;
+border-radius:6px;
+margin:25px 0;
+}
+
+.features p{
+font-size:14px;
+padding:8px 0;
+color:#555;
+}
+
+.cta-button{
+display:inline-block;
+background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);
+color:#fff !important;
+padding:14px 35px;
+text-decoration:none;
+border-radius:5px;
+font-size:16px;
+font-weight:600;
+margin:25px 0;
+}
+
+.support-text{
+font-size:14px;
+color:#777;
+margin-top:25px;
+padding-top:20px;
+border-top:1px solid #eee;
+}
+
+.footer{
+background:#f8f9fa;
+padding:25px 30px;
+text-align:center;
+border-top:1px solid #eee;
+}
+
+.footer p{
+font-size:12px;
+color:#888;
+margin:8px 0;
+}
+
+@media only screen and (max-width:600px){
+
+.email-container{
+margin:0;
+border-radius:0;
+}
+
+.content{
+padding:30px 20px;
+}
+
+.cta-button{
+display:block;
+text-align:center;
+}
+
+}
+
+</style>
+</head>
+<body>
+
+<div class="email-container">
+
+<div class="header">
+<h1>🔐 Reset Your Password</h1>
+<p>Password Recovery Request</p>
+</div>
+
+<div class="content">
+
+<div class="greeting">
+Hi <strong>${userName}</strong>,
+</div>
+
+<div class="message">
+We received a request to reset your QuickNest account password.
+Click the button below to set a new password.
+</div>
+
+<div class="features">
+<p>✓ Password reset link generated successfully</p>
+<p>✓ This link will expire in 15 minutes</p>
+<p>✓ Use it only once for security</p>
+</div>
+
+<a href="${resetUrl}" class="cta-button">
+Reset Password
+</a>
+
+<div class="support-text">
+If you did not request this password reset, you can safely ignore this email.
+Your account will remain secure.
+</div>
+
+</div>
+
+<div class="footer">
+<p>© 2026 QuickNest. All rights reserved.</p>
+<p>QuickNest Support | support@quicknest.com</p>
+</div>
+
+</div>
+
+</body>
+</html>
+`;
+};
+
+
+export default {
+  getWelcomeEmailTemplate,
+  getProviderRegistrationEmailTemplate,
+  getBookingConfirmationEmailTemplate,
+  getBookingCancelledEmailTemplate,
+  getBookingCompletedEmailTemplate,
+  getForgotPasswordEmailTemplate
+};

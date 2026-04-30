@@ -1,35 +1,92 @@
 import express from "express";
+import bookingController from "../controllers/bookingController.js";
 import auth from "../middleware/auth.js";
-import bookingController from "../controller/bookingController.js";
 import checkRole from "../middleware/checkRole.js";
 
 const router = express.Router();
 
-// Create booking
-router.post("/create", auth, bookingController.createBooking);
 
-// Get available time slots for a service on a date (?serviceId=...&bookingDate=...)
-router.get("/availableSlots", auth, bookingController.availableTimeSlot);
+// CREATE BOOKING
+router.post(
+    "/create",
+    auth,
+    bookingController.createBooking
+);
 
-// Get all bookings (admin sees all, customer sees own)
-router.get("/getallBookings", auth, bookingController.getAllBooking);
 
-// Get bookings by service ID
-router.get("/getByServiceId/:id", auth, bookingController.getByServiceId);
+// ALL BOOKINGS
+router.get(
+    "/all",
+    auth,
+    bookingController.getAllBooking
+);
 
-// Get single booking by booking ID
-router.get("/getBookingById/:id", auth, bookingController.getBookingById);
 
-// Get bookings for logged-in user
-router.get("/user", auth, bookingController.bookingByUserId);
+// Own bookings (customer)
+router.get(
+    "/user",
+    auth,
+    bookingController.getBookingsByUserId
+);
 
-// Admin: get bookings by any user ID
-router.get("/user/:id", auth, checkRole("admin", "super_admin"), bookingController.bookingByUserId);
 
-// Update booking status (admin: any status | customer: cancel only)
-router.patch("/updateStatus/:id", auth, bookingController.updateBookingStatus);
+// BOOKINGS BY SERVICE ID
+router.get(
+    "/service/:id",
+    auth,
+    bookingController.getAllService
+);
 
-// Delete booking
-router.delete("/delete/:id", auth, bookingController.deleteBooking);
+
+// BOOKING BY ID
+router.get(
+    "/my/:id",
+    auth,
+    bookingController.getBookingById
+);
+
+
+// Bookings by userId (admin)
+router.get(
+    "/user/:id",
+    auth,
+    checkRole("admin", "super_admin"),
+    bookingController.getBookingsByUserId
+);
+
+
+// AVAILABLE TIME SLOTS
+router.get(
+    "/availableTimeSlots",
+    auth,
+    bookingController.availableTimeSlots
+);
+
+
+// CONFIRM BOOKING
+router.patch(
+    "/confirm/:id",
+    auth,
+    checkRole("admin", "super_admin"),
+    bookingController.confirmBookingStatus
+);
+
+
+// CANCEL BOOKING
+router.patch(
+    "/cancel/:id",
+    auth,
+    bookingController.cancelBookingStatus
+);
+
+
+// COMPLETE BOOKING
+router.patch(
+    "/complete/:id",
+    auth,
+    checkRole("admin", "super_admin"),
+    bookingController.completeBookingStatus
+);
+
 
 export default router;
