@@ -20,4 +20,8 @@ router.patch("/update/:id", auth, providerController.updateProvider);
 // Delete provider (admin or provider themselves)
 router.delete("/delete/:id", auth, providerController.deleteProvider);
 
+// provider can get own booking 
+
+router.get("/getProviderBooking", auth, checkRole("provider"), providerController.getProviderBooking);
+
 export default router;

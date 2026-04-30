@@ -182,10 +182,48 @@ const deleteProvider = async (req, res, next) => {
   }
 };
 
+const getProviderBooking = async (req, res, next) => {
+  try {
+
+    const userId = req.params.id || req.user._id;
+
+    const user = await Provider.findOne({ userId });
+
+    const role = req.user.role;
+
+    if (!user) {
+      return next(new HttpError("user not found", 404));
+    }
+
+    const bookings = await Booking.find({
+      providerId: user._id
+    });
+
+    if (!bookings || bookings.length === 0) {
+      return next(new HttpError("booking not found", 404));
+    }
+
+    
+    if (role === "provider") {
+
+      if (bookings[0].providerId.toString() !== user._id.toString()) {
+        return next(
+          new HttpError("with this provider not access", 400)
+        );
+      }
+
+    }
+    res.status(200).json({ success: true, message: "booking fetched successfully", booking })
+  } catch (error) {
+    next(new HttpError(error.message))
+  }
+}
+
 export default {
   registerAsProvider,
   getAllProvider,
   getProviderById,
   updateProvider,
   deleteProvider,
+  getProviderBooking,
 };
