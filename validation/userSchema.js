@@ -15,7 +15,7 @@ const UserSchema = Joi.object({
     .label("Password")
     .messages({
       "string.empty": "password is required",
-      "string.min": "password must be atleast 6 character long",
+      "string.min": "password must be atLeast 6 character long",
     }),
   phone: Joi.number().min(1000000000).max(9999999999).label("Phone").messages({
     "number.empty": "number is required",

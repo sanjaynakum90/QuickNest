@@ -5,115 +5,269 @@ import Booking from "../models/Booking.js";
 
 import sendEmail from "../utils/sendEmail.js";
 import {
- getBookingConfirmationEmailTemplate,
- getBookingCancelledEmailTemplate,
- getBookingCompletedEmailTemplate
+  getBookingConfirmationEmailTemplate,
+  getBookingCancelledEmailTemplate,
+  getBookingCompletedEmailTemplate
 } from "../services/emailTemplate.js";
 
 import sendWhatsAppMessage from "../utils/sendWhatsAppMessage.js";
 
 
-// CREATE BOOKING
+// // CREATE BOOKING
+// const createBooking = async (req, res, next) => {
+//   try {
+
+//     const { serviceId, providerId, bookingDate, timeSlot, notes } = req.body;
+
+//     const userId = req.user._id;
+
+//     if (!serviceId || !bookingDate || !timeSlot) {
+//       return next(new HttpError("All fields are required", 400));
+//     }
+
+//     const service = await Service.findById(serviceId);
+
+//      if (!service) {
+//       return next(new HttpError("Service not found with the provided ID", 404));
+//     }
+
+//     if (!service.isActive) {
+//       return next(
+//         new HttpError("This service is currently unavailable, Please try again later", 400)
+//       );
+//     }
+
+//     const booking = new Date(bookingDate);
+
+//     const startOfDay = new Date(booking.setHours(0, 0, 0, 0));
+
+//     const endOfDay = new Date(booking.setHours(23, 59, 59, 999));
+
+
+//     const existingBooking = await Booking.findOne({
+//       serviceId,
+//       bookingDate: { $gte: startOfDay, $lt: endOfDay },
+//       timeSlot,
+//       status: { $in: ["pending", "confirmed"] },
+//     });
+
+
+//    if (existingBooking) {
+//       return next(
+//         new HttpError("This time slot is already booked for the selected service", 409),
+//       );
+//     }
+
+
+//     const newBooking = new Booking({
+//       userId,
+//       providerId,
+//       serviceId,
+//       bookingDate: new Date(bookingDate),
+//       timeSlot,
+//       notes,
+//       totalPrice: service.price,
+//     });
+
+
+//     await newBooking.save();
+
+//     await newBooking.populate([
+//       {
+//         path: "serviceId",
+//         select:"name price duration",
+//       },
+//       {
+//         path:"userId",
+//         select: "name email phone",
+//       },
+//     ]);
+
+//     // await newBooking.populate("serviceId");
+
+//     // await newBooking.populate("userId");
+
+//     await sendEmail({
+//       to: newBooking.userId.email,
+//       subject: "Booking Confirmation",
+//       html: getBookingConfirmationEmailTemplate(
+//          newBooking.userId.name,
+//          newBooking.serviceId.name,
+//          bookingDate,
+//          timeSlot
+//         )
+//     });
+
+//     await sendWhatsAppMessage(
+//       newBooking.userId.phone,
+//       "Your booking has been created successfully."
+//     );
+
+//     res.status(201).json({
+//       success: true,
+//       message: "Booking created successfully",
+//       newBooking,
+//     });
+
+//   } catch (error) {
+//     next(new HttpError(error.message, 500));
+//   }
+// };
+
 const createBooking = async (req, res, next) => {
+
+  const { serviceId, providerId, bookingDate, timeSlot, notes } = req.body;
+
+  const userId = req.user._id;
+
+  // Generate unique Redis lock key
+  const lockKey = `bookings:${providerId}:${serviceId}:${bookingDate}:${timeSlot}`;
+
+  let lockAcquired = false;
+
   try {
 
-    const { serviceId, providerId, bookingDate, timeSlot, notes } = req.body;
-
-    const userId = req.user._id;
-
-    if (!serviceId || !bookingDate || !timeSlot) {
-      return next(new HttpError("All fields are required", 400));
+    // Missing fields
+    if (!serviceId || !providerId || !bookingDate || !timeSlot) {
+      return next(new HttpError("All required fields must be provided", 400));
     }
 
+    // Date Validation
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    const selectDate = new Date(bookingDate + "T00:00:00");
+    selectDate.setHours(0, 0, 0, 0);
+
+    const maxDate = new Date(today);
+    maxDate.setDate(maxDate.getDate() + 7);
+
+    if (selectDate > maxDate) {
+      return next(new HttpError("Booking allowed only within next 7 days", 400));
+    }
+
+    if (selectDate < today) {
+      return next(new HttpError("Cannot book for past dates", 400));
+    }
+
+    // Time Validation
+    const now = new Date();
+
+    if (selectDate.getTime() === today.getTime()) {
+
+      const [startTime] = timeSlot.split("-");
+      const [hours, minutes] = startTime.trim().split(":").map(Number);
+
+      if (isNaN(hours) || isNaN(minutes)) {
+        return next(new HttpError("Invalid time format", 400));
+      }
+
+      const slotDateAndTime = new Date(selectDate);
+      slotDateAndTime.setHours(hours, minutes, 0, 0);
+
+      if (slotDateAndTime < now) {
+        return next(new HttpError("Cannot book past time slots", 400));
+      }
+    }
+
+    // Redis Lock
+    const lock = await redisClient.set(lockKey, userId.toString(), {
+      NX: true,
+      EX: 10,
+    });
+
+    if (!lock) {
+      return next(new HttpError("This time slot is already being booked, please try again", 409));
+    }
+
+    lockAcquired = true;
+
+    // Service Validation
     const service = await Service.findById(serviceId);
 
-     if (!service) {
-      return next(new HttpError("Service not found with the provided ID", 404));
+    if (!service) {
+      return next(new HttpError("Service not found", 404));
     }
 
     if (!service.isActive) {
-      return next(
-        new HttpError("This service is currently unavailable, Please try again later", 400)
-      );
+      return next(new HttpError("Service is currently inactive", 403));
     }
 
-    const booking = new Date(bookingDate);
+    // Provider Validation
+    const provider = await Provider.findById(providerId);
 
-    const startOfDay = new Date(booking.setHours(0, 0, 0, 0));
+    if (!provider) {
+      return next(new HttpError("Provider not found", 404));
+    }
 
-    const endOfDay = new Date(booking.setHours(23, 59, 59, 999));
+    // Booking Conflict Check
+    const startOfDay = new Date(bookingDate);
+    startOfDay.setHours(0, 0, 0, 0);
 
+    const endOfDay = new Date(bookingDate);
+    endOfDay.setHours(23, 59, 59, 999);
 
     const existingBooking = await Booking.findOne({
       serviceId,
+      providerId,
       bookingDate: { $gte: startOfDay, $lt: endOfDay },
       timeSlot,
       status: { $in: ["pending", "confirmed"] },
     });
 
-   
-   if (existingBooking) {
-      return next(
-        new HttpError("This time slot is already booked for the selected service", 409),
-      );
+    if (existingBooking) {
+      return next(new HttpError("This time slot is already booked", 409));
     }
 
-
+    // Create Booking
     const newBooking = new Booking({
       userId,
-      providerId,
       serviceId,
+      providerId,
       bookingDate: new Date(bookingDate),
       timeSlot,
       notes,
       totalPrice: service.price,
     });
 
-
     await newBooking.save();
 
     await newBooking.populate([
       {
         path: "serviceId",
-        select:"name price duration",
+        select: "name price duration -_id",
       },
       {
-        path:"userId",
+        path: "userId",
         select: "name email phone",
+      },
+      {
+        path: "providerId",
+        select: "name",
       },
     ]);
 
-    // await newBooking.populate("serviceId");
-
-    // await newBooking.populate("userId");
-
-    await sendEmail({
-      to: newBooking.userId.email,
-      subject: "Booking Confirmation",
-      html: getBookingConfirmationEmailTemplate(
-         newBooking.userId.name,
-         newBooking.serviceId.name,
-         bookingDate,
-         timeSlot
-        )
-    });
 
     await sendWhatsAppMessage(
       newBooking.userId.phone,
-      "Your booking has been created successfully."
+      "Booking has been created successfully"
     );
 
     res.status(201).json({
       success: true,
-      message: "Booking created successfully",
+      message: "Booking confirmed successfully",
       newBooking,
     });
 
   } catch (error) {
     next(new HttpError(error.message, 500));
   }
+  finally {
+    if (lockAcquired) {
+      await redisClient.del(lockKey);
+    }
+  }
 };
-
 
 // GET ALL BOOKINGS
 const getAllBooking = async (req, res, next) => {
@@ -178,7 +332,7 @@ const getAllService = async (req, res, next) => {
     const serviceId = req.params.id;
 
     if (Role === "admin" || Role === "super_admin") {
-      bookings = await Booking.find({  })
+      bookings = await Booking.find({})
         .populate([
           {
             path: "serviceId",
@@ -189,17 +343,17 @@ const getAllService = async (req, res, next) => {
             select: "name email phone",
           },
         ]);
-    } 
-    
+    }
+
     else if (Role === "customer") {
       bookings = await Booking.find({
         userId: req.user._id,
         serviceId: serviceId,
       })
         .populate("serviceId", "name price duration description");
-    } 
-    
-   else {
+    }
+
+    else {
       return next(new HttpError("You are not authorized to access this resource", 401));
     }
 
@@ -212,7 +366,7 @@ const getAllService = async (req, res, next) => {
 
     res.status(200).json({
       success: true,
-      message:  "Service bookings retrieved successfully",
+      message: "Service bookings retrieved successfully",
       bookings,
     });
 
@@ -290,9 +444,9 @@ const getBookingsByUserId = async (req, res, next) => {
 // AVAILABLE TIME SLOTS
 const availableTimeSlots = async (req, res, next) => {
 
- try{
+  try {
 
-   const { serviceId, bookingDate } = req.query
+    const { serviceId, bookingDate } = req.query
 
     const service = await Service.findById(serviceId)
 
@@ -313,28 +467,28 @@ const availableTimeSlots = async (req, res, next) => {
         $gte: startOfDay,
         $lte: endOfDay,
       },
-      status: { 
-        $in: ["pending", "confirmed"] 
+      status: {
+        $in: ["pending", "confirmed"]
       },
     });
 
     const bookedSlots = bookings.map((b) => b.timeSlot);
 
     const allTimeSlots = [
-        "09:00 AM - 10:00 AM",
-        "10:00 AM - 11:00 AM",
-        "11:00 AM - 12:00 PM",
-        "12:00 PM - 01:00 PM",
-        "02:00 PM - 03:00 PM",
-        "03:00 PM - 04:00 PM",
-        "04:00 PM - 05:00 PM",
-        "05:00 PM - 06:00 PM"
-      ]
+      "09:00 AM - 10:00 AM",
+      "10:00 AM - 11:00 AM",
+      "11:00 AM - 12:00 PM",
+      "12:00 PM - 01:00 PM",
+      "02:00 PM - 03:00 PM",
+      "03:00 PM - 04:00 PM",
+      "04:00 PM - 05:00 PM",
+      "05:00 PM - 06:00 PM"
+    ]
 
     const availableTimeSlots = allTimeSlots.filter(
       (slot) => !bookedSlots.includes(slot));
 
-    
+
     res.status(200).json({
       success: true,
       message: availableTimeSlots.length
@@ -350,21 +504,21 @@ const availableTimeSlots = async (req, res, next) => {
 
 // CONFIRM BOOKING
 const confirmBookingStatus = async (req, res, next) => {
-  try{
+  try {
 
     const id = req.params.id;
 
     const booking = await Booking.findById(id);
 
     if (!booking) {
-      return next(new HttpError("Booking not found",404));
+      return next(new HttpError("Booking not found", 404));
     }
 
     if (booking.status === "confirmed") {
-      return next(new HttpError("This booking is already confirmed",404));
+      return next(new HttpError("This booking is already confirmed", 404));
     }
 
-    if (booking.status === "cancelled"){
+    if (booking.status === "cancelled") {
       return next(new HttpError("Cancelled bookings cannot be confirmed", 400));
     }
 
@@ -379,12 +533,12 @@ const confirmBookingStatus = async (req, res, next) => {
 
     res.status(200).json({
       success: true,
-      message:"Booking confirmed successfully",
+      message: "Booking confirmed successfully",
       booking,
     });
 
-    
-  }catch(error){
+
+  } catch (error) {
     next(new HttpError(error.message, 500));
   }
 }
@@ -398,8 +552,8 @@ const cancelBookingStatus = async (req, res, next) => {
     const id = req.params.id;
 
     const booking = await Booking.findById(id)
-      .populate("userId","name email phone")
-      .populate("serviceId","name");
+      .populate("userId", "name email phone")
+      .populate("serviceId", "name");
 
     if (!booking) {
       return next(new HttpError("Booking not found", 404));
@@ -455,8 +609,8 @@ const completeBookingStatus = async (req, res, next) => {
     const id = req.params.id
 
     const booking = await Booking.findById(id)
-      .populate("userId","name email")
-      .populate("serviceId","name");
+      .populate("userId", "name email")
+      .populate("serviceId", "name");
 
     if (!booking) {
       return next(new HttpError("Booking not found", 404));
@@ -503,7 +657,7 @@ export default {
   createBooking,
   getAllBooking,
   getAllService,
-  getBookingById, 
+  getBookingById,
   getBookingsByUserId,
   availableTimeSlots,
   confirmBookingStatus,

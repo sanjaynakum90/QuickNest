@@ -26,6 +26,7 @@
     "multer": "^2.1.1",
     "multer-storage-cloudinary": "^4.0.0",
     "nodemailer": "^8.0.5",
+    "redis": "^5.12.1",
     "twilio": "^6.0.0"
   },
   "devDependencies": {
