@@ -1,6 +1,6 @@
 import express from "express";
 
-import userController from "../controllers/userController.js";
+import userController from "../controller/userController.js";
 
 import validate from "../middleware/validate.js";
 import auth from "../middleware/auth.js";
@@ -9,7 +9,6 @@ import uploads from "../middleware/upload.js";
 import { authLimiter } from "../middleware/rateLimit.js";
 
 import { createUserSchema, updateUserSchema } from "../validation/UserSchema.js";
-import { forgetPasswordSchema, resetPasswordSchema } from "../validation/passwordSchema.js";
 
 
 const router = express.Router();
@@ -80,14 +79,12 @@ router.delete(
 
 router.post(
     "/forget-password",
-    validate(forgetPasswordSchema),
     userController.forgetPassword
 );
 
 
 router.post(
     "/reset-password/:token",
-    validate(resetPasswordSchema),
     userController.resetPassword
 );
 

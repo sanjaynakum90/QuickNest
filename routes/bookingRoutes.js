@@ -1,5 +1,5 @@
 import express from "express";
-import bookingController from "../controllers/bookingController.js";
+import bookingController from "../controller/bookingController.js";
 import auth from "../middleware/auth.js";
 import checkRole from "../middleware/checkRole.js";
 

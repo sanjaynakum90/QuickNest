@@ -1,5 +1,5 @@
 import HttpError from "../middleware/HttpError.js";
-import User from "../models/User.js";
+import User from "../model/User.js";
 import cloudinary from "../config/cloudinary.js";
 
 import sendEmail from "../utils/sendEmail.js";

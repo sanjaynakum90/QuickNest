@@ -1,7 +1,7 @@
 import HttpError from "../middleware/HttpError.js";
 
-import Service from "../models/Service.js";
-import Booking from "../models/Booking.js";
+import Service from "../model/Services.js";
+import Booking from "../model/Booking.js";
 
 import sendEmail from "../utils/sendEmail.js";
 import {
@@ -10,7 +10,7 @@ import {
   getBookingCompletedEmailTemplate
 } from "../services/emailTemplate.js";
 
-import sendWhatsAppMessage from "../utils/sendWhatsAppMessage.js";
+import sendWhatsAppMessage from"../utils/sendWatsApp.js";
 
 
 // // CREATE BOOKING
