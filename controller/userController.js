@@ -8,6 +8,8 @@ import { getWelcomeEmailTemplate } from "../services/emailTemplate.js";
 import crypto from "crypto";
 import { getForgotPasswordEmailTemplate } from "../services/emailTemplate.js";
 
+import auditLogger from "../utils/auditLogger.js";
+
 
 
 // CREATE USER
@@ -214,14 +216,40 @@ const update = async (req, res, next) => {
 // DELETE 
 const deleteUser = async (req, res, next) => {
   try {
-    const user = req.user;
+    const targetedUser = req.params.id || req.user._id;
 
+    const user = await User.findById(targetedUser);
+
+    if (!user) {
+      return next(new HttpError("user not found", 404))
+    };
+
+    if (
+      !req.user.role === "admin" &&
+      !req.user.role === "super_admin" &&
+      !req.user._id.toString() !== user._id.toString()
+    ) {
+      return next(new HttpError("unauthorized access", 401));
+    };
+
+
+    await User.deleteOne(user);
 
     if (user.cloudinaryId) {
       await cloudinary.uploader.destroy(user.cloudinaryId);
-    }
+    };
 
-    await User.deleteOne(user);
+
+
+    await auditLogger({
+      action: "USER_DELETE",
+      performedBy: req.user._id,
+      module: user.role,
+      targetedId: user._id,
+      Ip: req.ip,
+      userAgent: req.get("User-Agent"),
+    });
+
 
     res.status(200).json({
       success: true,
